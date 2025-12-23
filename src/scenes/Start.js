@@ -18,7 +18,7 @@ export class Start extends Phaser.Scene {
         this.load.image('tree6', 'assets/Background/6.png');
         this.load.image('platform', 'assets/Platform.png');
         this.load.image('tile_72', 'assets/Background/1 Tiles/Tile_72.png');
-        this.load.image('sword_1', 'assets/Shinobi/Sword1.png');
+        
 
         //  The player sprite is CC0 from https://ansimuz.itch.io - check out his other work!
         this.load.spritesheet('player', 'assets/Shinobi/Idle.png', { frameWidth: 128, frameHeight: 128 });
@@ -306,26 +306,13 @@ export class Start extends Phaser.Scene {
             this.playerHealthPoints = 100;
             this.enemyHealthPoints = 50;
             this.isDead = false;
-
-            this.weapon = this.add.sprite(this.player.x + 50, this.player.y + 20, 'sword_1')
-            this.physics.add.existing(this.weapon, false);
-            this.weapon.body.setEnable(false)
-            // this.weapon.body.setOffset(45, 50);
             
-
             this.physics.add.collider(this.player, this.yurei_1, (playerGameObject, enemyGameObject) => {
             console.log('collide with yurei_1')
             this.playerHealthPoints -= 1;
                 
             } );
             this.physics.add.collider(this.player, this.yurei_1)
-
-            this.physics.add.collider(this.weapon, this.yurei_1, (playerGameObject, enemyGameObject) => {
-                console.log('weapon collide with yurei_1')
-                
-                this.enemyHealthPoints -= 1;
-            } );
-            this.physics.add.collider(this.weapon, this.yurei_1)
 
         // In your create() function
         // let player;
@@ -415,8 +402,6 @@ export class Start extends Phaser.Scene {
 
         // Handle left and right movement
         if (this.cursors.left.isDown && !this.isDead) {
-            this.weapon.destroy();
-            this.weapon = this.add.sprite(this.player.x - 50, this.player.y + 20, 'sword_1')
             this.player.setVelocityX(-currentSpeed);
             // Play the appropriate animation
             if (currentSpeed === this.runSpeed && this.player.body.touching.down) {
@@ -425,12 +410,9 @@ export class Start extends Phaser.Scene {
                 this.player.anims.play('walk', true);
             }
             // Optional: flip sprite if you only have one set of animations
-            this.weapon.setFlipX(true)
             this.player.flipX = true; 
 
         }else if (this.cursors.right.isDown && !this.isDead) {
-            this.weapon.destroy();
-             this.weapon = this.add.sprite(this.player.x + 50, this.player.y + 20, 'sword_1')
             this.player.setVelocityX(currentSpeed);
             // Play the appropriate animation
             if (currentSpeed === this.runSpeed && this.player.body.touching.down) {

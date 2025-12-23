@@ -117,6 +117,19 @@ export class Start extends Phaser.Scene {
         repeat: -1 // Loop indefinitely
         });
 
+        //Hit box
+        this.attackHitbox = this.physics.add.sprite(0,0, null)
+        .setSize(32,32)
+        .setVisible(true)
+        .setActive(false)
+
+       
+       this.attackHitbox.body.setAllowGravity(false);
+       this.attackHitbox.body.setImmovable(true);
+       this.attackHitbox.body.enable = true;
+
+        
+     
        
         // this.yurei_2 = new Enemy(this, 100, 300,'yurei_2_idle', 'yurei_2_attack3',this.player );
         // this.yurei_2.body.setSize(40,80,false);
@@ -308,11 +321,17 @@ export class Start extends Phaser.Scene {
             this.isDead = false;
             
             this.physics.add.collider(this.player, this.yurei_1, (playerGameObject, enemyGameObject) => {
-            console.log('collide with yurei_1')
-            this.playerHealthPoints -= 1;
-                
+            this.playerHealthPoints -= 1;  
             } );
             this.physics.add.collider(this.player, this.yurei_1)
+
+            this.physics.add.collider(this.attackHitbox, this.yurei_1, (playerGameObject, enemyGameObject) => {
+            this.enemyHealthPoints -= 1;  
+            } );
+            this.physics.add.collider(this.attackHitbox, this.yurei_1)
+
+
+
 
         // In your create() function
         // let player;
@@ -342,8 +361,16 @@ export class Start extends Phaser.Scene {
     this.yurei_1.update();
     // this.yurei_2.update();
 
-    console.log(this.playerHealthPoints)
-    console.log(this.isDead)
+    console.log(this.enemyHealthPoints)
+
+    if(this.attackHitbox.active){
+        const offsetX = this.player.flipX ? -40 : 40;
+        this.attackHitbox.setPosition(
+            this.player.x + offsetX,
+            this.player.y + 20
+        )
+    }
+
     this.playerMaxHealth = 100;
     this.enemyMaxHealth = 100;
 
@@ -373,7 +400,6 @@ export class Start extends Phaser.Scene {
     // -------------------
 
     if(this.playerHealthPoints < 1){
-        console.log(this.playerHealthPoints)
         this.isDead = true
     }
 
@@ -388,6 +414,21 @@ export class Start extends Phaser.Scene {
         this.playerAttacking = true;
         this.player.anims.play('attack3', true);
     }
+
+    if(this.playerAttacking){
+        this.attackHitbox.setVelocity(0,0);
+        this.attackHitbox.enable = true;
+        this.attackHitbox.active = true;
+    }
+
+    this.time.delayedCall(200, () => {
+        this.attackHitbox.setActive(false)
+        this.attackHitbox.body.enable = false;
+    });
+
+    console.log('player attackin: ', this.playerAttacking)
+    console.log('active:', this.attackHitbox.active)
+    console.log('enable:', this.attackHitbox.body.enable)
 
     if( !this.playerAttacking ) {
         // Reset horizontal velocity first to create a 'stop-start' movement style

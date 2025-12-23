@@ -38,10 +38,15 @@ export class Start extends Phaser.Scene {
 
         // Enemy sprites
         this.load.spritesheet('yurei_idle', 'assets/Yurei/Idle.png', {frameWidth: 128, frameHeight: 128});
+        this.load.spritesheet('yurei_walk', 'assets/Yurei/Walk.png', {frameWidth: 128, frameHeight: 128});
         this.load.spritesheet('yurei_attack1', 'assets/Yurei/Attack_1.png', {frameWidth: 128, frameHeight: 128});
         this.load.spritesheet('yurei_attack2', 'assets/Yurei/Attack_2.png', {frameWidth: 128, frameHeight: 128});
         this.load.spritesheet('yurei_attack2', 'assets/Yurei/Attack_2.png', {frameWidth: 128, frameHeight: 128});
         this.load.spritesheet('yurei_attack3', 'assets/Yurei/Attack_3.png', {frameWidth: 128, frameHeight: 128});
+        this.load.spritesheet('yurei_scream', 'assets/Yurei/Scream.png', {frameWidth: 128, frameHeight: 128});
+        this.load.spritesheet('yurei_dead', 'assets/Yurei/Dead.png', {frameWidth: 128, frameHeight: 128});
+        this.load.spritesheet('yurei_hurt', 'assets/Yurei/Hurt.png', {frameWidth: 128, frameHeight: 128});
+
    
     }
     create() {
@@ -105,7 +110,7 @@ export class Start extends Phaser.Scene {
         this.player.setBounce(0.1);  
         
         // Create the enemy instance, passing the current scene and the player object
-        this.yurei_1 = new Enemy(this, 600, 500,'yurei_idle', 'yurei_attack1',this.player );
+        this.yurei_1 = new Enemy(this, 600, 500,'yurei_idle', 'yurei_attack1','yurei_dead', this.player);
         this.yurei_1.body.setSize(40,80,false);
         this.yurei_1.body.setOffset(45, 50);
         this.tweens.add({
@@ -119,8 +124,8 @@ export class Start extends Phaser.Scene {
 
         //Hit box
         this.attackHitbox = this.physics.add.sprite(0,0, null)
-        .setSize(32,32)
-        .setVisible(true)
+        .setSize(45,45)
+        .setVisible(false)
         .setActive(false)
 
        
@@ -257,6 +262,12 @@ export class Start extends Phaser.Scene {
             this.yurei_1.anims.create({
                 key: 'yurei_idle',
                 frames: this.anims.generateFrameNumbers('yurei_idle', {frames: [0, 1, 2, 3]}),
+                frameRate: 6,
+                repeat: -1
+            })
+            this.yurei_1.anims.create({
+                key: 'yurei_walk',
+                frames: this.anims.generateFrameNumbers('yurei_walk', {frames: [0, 1, 2, 3,4]}),
                 frameRate: 20,
                 repeat: -1
             })
@@ -265,6 +276,18 @@ export class Start extends Phaser.Scene {
                 frames: this.anims.generateFrameNumbers('yurei_attack1', {frames: [0, 1, 2, 3]}),
                 frameRate: 10,
                 repeat: -1
+            })
+            this.yurei_1.anims.create({
+                key: 'yurei_dead',
+                frames: this.anims.generateFrameNumbers('yurei_dead', {frames: [0, 1, 2, 3]}),
+                frameRate: 10,
+                repeat: 0,
+            })
+            this.yurei_1.anims.create({
+                key: 'yurei_scream',
+                frames: this.anims.generateFrameNumbers('yurei_scream', {frames: [0, 1, 2, 3]}),
+                frameRate: 10,
+                repeat: 0,
             })
 
             // this.yurei_2.anims.create({
@@ -317,8 +340,9 @@ export class Start extends Phaser.Scene {
             this.runSpeed = 400; // Faster speed for running
 
             this.playerHealthPoints = 100;
-            this.enemyHealthPoints = 50;
+            this.enemyHealthPoints = 100;
             this.isDead = false;
+            this.enemyIsDead = false;
             
             this.physics.add.collider(this.player, this.yurei_1, (playerGameObject, enemyGameObject) => {
             this.playerHealthPoints -= 1;  
@@ -326,7 +350,7 @@ export class Start extends Phaser.Scene {
             this.physics.add.collider(this.player, this.yurei_1)
 
             this.physics.add.collider(this.attackHitbox, this.yurei_1, (playerGameObject, enemyGameObject) => {
-            this.enemyHealthPoints -= 1;  
+            this.enemyHealthPoints -= 25;  
             } );
             this.physics.add.collider(this.attackHitbox, this.yurei_1)
 
@@ -358,10 +382,12 @@ export class Start extends Phaser.Scene {
 
  
     update() {
+
     this.yurei_1.update();
-    // this.yurei_2.update();
+    
 
     console.log(this.enemyHealthPoints)
+    console.log('Start: enemy is dead: ',this.enemyIsDead)
 
     if(this.attackHitbox.active){
         const offsetX = this.player.flipX ? -60 : 60;
@@ -373,7 +399,6 @@ export class Start extends Phaser.Scene {
 
     this.playerMaxHealth = 100;
     this.enemyMaxHealth = 100;
-
 
 
     // In your update() function
@@ -399,8 +424,17 @@ export class Start extends Phaser.Scene {
     // ATTACKING LOGIC
     // -------------------
 
-    if(this.playerHealthPoints < 1){
-        this.isDead = true
+    if(this.playerHealthPoints < 1 ){
+        this.isDead = true;
+    }
+
+    if(this.enemyHealthPoints < 1 ) {
+        this.enemyIsDead = true;
+    }
+
+     // Enemy
+    if(this.enemyIsDead){
+        this.yurei_1.isDead = true;
     }
 
 
@@ -421,14 +455,10 @@ export class Start extends Phaser.Scene {
         this.attackHitbox.active = true;
     }
 
-    this.time.delayedCall(200, () => {
+    this.time.delayedCall(100, () => {
         this.attackHitbox.setActive(false);
         this.attackHitbox.body.enable = false;
     });
-
-    console.log('player attackin: ', this.playerAttacking)
-    console.log('active:', this.attackHitbox.active)
-    console.log('enable:', this.attackHitbox.body.enable)
 
     if( !this.playerAttacking ) {
         // Reset horizontal velocity first to create a 'stop-start' movement style
@@ -484,11 +514,13 @@ export class Start extends Phaser.Scene {
             this.isJumping = true;
         }
 
-
-
+        
     }
+   
+
+    
     // -------------------
-    // ATTACKING LOGIC
+    // 
     // -------------------
 
     

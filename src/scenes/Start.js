@@ -126,7 +126,7 @@ export class Start extends Phaser.Scene {
        
        this.attackHitbox.body.setAllowGravity(false);
        this.attackHitbox.body.setImmovable(true);
-       this.attackHitbox.body.enable = true;
+       this.attackHitbox.body.enable = false;
 
         
      
@@ -364,7 +364,7 @@ export class Start extends Phaser.Scene {
     console.log(this.enemyHealthPoints)
 
     if(this.attackHitbox.active){
-        const offsetX = this.player.flipX ? -40 : 40;
+        const offsetX = this.player.flipX ? -60 : 60;
         this.attackHitbox.setPosition(
             this.player.x + offsetX,
             this.player.y + 20
@@ -417,12 +417,12 @@ export class Start extends Phaser.Scene {
 
     if(this.playerAttacking){
         this.attackHitbox.setVelocity(0,0);
-        this.attackHitbox.enable = true;
+        this.attackHitbox.body.enable = true;
         this.attackHitbox.active = true;
     }
 
     this.time.delayedCall(200, () => {
-        this.attackHitbox.setActive(false)
+        this.attackHitbox.setActive(false);
         this.attackHitbox.body.enable = false;
     });
 
